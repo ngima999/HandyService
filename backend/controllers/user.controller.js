@@ -1,15 +1,28 @@
 import { User } from '../models/user.model.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import getDataURI from '../utils/datauri.js';
+import cloudinary from "../utils/cloudinary.js";
+
 
 // Register a new user
-export const register = async (req, res) => {
+export const signup = async (req, res) => {
     try {
-        const { fullname, email, phoneNumber, password, role } = req.body;
+        const { fullName, email, phoneNumber, password, role } = req.body;
+        console.log(req.body);
+        console.log(req.file);
+
+        if (!req.file) {
+            return res.status(400).json({ message: "Profile picture is required", success: false });
+        }
         
-        if (!fullname || !email || !phoneNumber || !password || !role) {
+        if (!fullName || !email || !phoneNumber || !password || !role) {
             return res.status(400).json({ message: "All fields are required", success: false });
         }
+
+        const file = req.file;
+        const fileUri = getDataURI(file);
+        const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
 
         const userExists = await User.findOne({ email });
         if (userExists) {
@@ -17,7 +30,16 @@ export const register = async (req, res) => {
         }
 
         const hashPassword = await bcrypt.hash(password, 10);
-        await User.create({ fullname, email, phoneNumber, password: hashPassword, role });
+
+        // Corrected User creation
+        await User.create({
+            fullName,
+            email,
+            phoneNumber,
+            password: hashPassword,
+            role,
+            profile: { profilePhoto: cloudResponse.secure_url }
+        });
 
         return res.status(201).json({
             message: "Account created successfully",
@@ -30,8 +52,9 @@ export const register = async (req, res) => {
     }
 };
 
+
 // Login user and return token
-export const login = async (req, res) => {
+export const signin = async (req, res) => {
     try {
         const { email, password, role } = req.body;
 
@@ -110,10 +133,14 @@ export const logout = async (req, res) => {
 //Update user profile
 export const updateProfile = async (req, res) => {
     try{
-        const { fullname, email, phoneNumber, experience, rating, role, skills } = req.body;
-        const file = req.file;
+        const { fullName, email, phoneNumber, experience, rating, role, skills } = req.body;
 
         //cloudinary upload
+        const file = req.file;
+        if (file) {
+            const fileURI = getDataURI(file);
+            const cloudResponse = await cloudinary.uploader.upload(fileURI.content);
+        }
         
         let skillsArray
         if (skills) {
@@ -125,23 +152,26 @@ export const updateProfile = async (req, res) => {
             return res.status(400).json({ message: "User does not exist", success: false });
         }
 
-
-      
-    
+        
          // ✅ Only update fields if they exist in req.body
-         if (fullname) user.fullname = fullname;
+         if (fullName) user.fullname = fullName;
          if (email) user.email = email;
          if (phoneNumber) user.phoneNumber = phoneNumber;
          if (role) user.role = role;
          if (experience) user.profile.experience = experience;
          if (rating) user.profile.rating = rating;
          if (skillsArray) user.profile.skills = skillsArray;
+
+         if(cloudResponse){
+            user.profile.resume = cloudResponse.secure_url;
+            user.profile.resumeOriginalName = file.originalname;
+         }
         
         await user.save();
 
         user = {
             _id: user._id,
-            fullname: user.fullname,
+            fullName: user.fullName,
             email: user.email,
             phoneNumber: user.phoneNumber,
             role: user.role, 
