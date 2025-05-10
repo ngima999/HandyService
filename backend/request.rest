@@ -1,0 +1,128 @@
+# Register User
+
+### register Customer
+POST http://localhost:8000/api/user/register
+Content-Type: application/json
+
+{
+    "fullname": "John Doe",
+    "email": "johndoe@example.com",
+    "phoneNumber": "1234567890",
+    "password": "securepassword",
+    "role": "Customer"
+}
+
+
+
+### register serviceProvider
+POST http://localhost:8000/api/user/register
+Content-Type: application/json
+
+{
+    "fullname": "Dawa",
+    "email": "dawa@example.com",
+    "phoneNumber": "6789000000",
+    "password": "password",
+    "role": "serviceProvider"
+}
+
+
+
+# Login User
+
+
+### Customer login
+POST http://localhost:8000/api/user/login
+Content-Type: application/json
+
+{
+    "email": "johndoe@example.com",
+    "password": "securepassword",
+    "role": "Customer"
+}
+
+
+
+### log in Service Provider 
+POST http://localhost:8000/api/user/login
+Content-Type: application/json
+
+{
+    "email": "dawa@example.com",
+    "password": "password",
+    "role": "serviceProvider"
+}
+
+
+
+# Profile Update 
+
+
+### update profile customer
+PUT http://localhost:8000/api/user/profile/update
+Content-Type: application/json
+
+{
+    "fullname": "Lhakpa"
+}
+
+
+
+
+
+###Logout User
+GET  http://localhost:8000/api/user/logout
+
+
+# Jobs 
+
+
+### post job
+POST http://localhost:8000/api/job/postJob
+Content-Type: application/json
+
+{
+    "title": "Electrician", 
+    "description": "Need to change the MCB of my home", 
+    "date": "2025-03-02",
+    "time": "2 - 3 PM", 
+    "cost": 3500, 
+    "location": "chabahil",
+    "postedBy": "67b9bd1d66288380eacdb31f"
+}
+
+
+### get jobs created by customer
+GET http://localhost:8000/api/job/customer
+
+
+### get all jobs
+GET  http://localhost:8000/api/job/get
+
+
+
+### get jobs by id
+GET  http://localhost:8000/api/job/67c687c693974f05f0f886b3
+
+
+
+
+# Application
+
+
+### apply for job
+POST http://localhost:8000/api/bid/applyJob/67ce78507992a621df1e7bd4
+
+
+
+### update Status
+POST http://localhost:8000/api/bid/updateStatus/67c7e65581783b8e22444206
+Content-Type: application/json
+
+{
+    "status": "accepted"
+}
+
+
+### get all Applicants
+GET http://localhost:8000/api/bid/getApplicants
